@@ -53,22 +53,8 @@ class Game:
     def __init__(self):
         self.deck = Deck()
         self.deck.build()
-        self.dealer = Hand()
+        self.dealer = Hand("dealer")
         self.players = []
     def register(self, h : Hand):
         self.players.append(h)
-
-
-class CLI:
-    def __init__(self, num_of_players : int):
-        self.num_of_players = num_of_players
-        self.game = Game()
-        # for 1 player 
-    
-    def add_player(self, id : str):
-        self.game.register(Hand(id))
-        
-    def run(self):
-        pass
-    
 

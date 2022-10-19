@@ -2,6 +2,7 @@
 from core import *
 from unittest import TestCase
 import pytest
+from clients import CLI
 
 
 # Test core
@@ -52,6 +53,39 @@ class TryTesting(TestCase):
         h = Hand("kek")
         g.register(h)
         self.assertEqual(h, g.players[0])
+
+# test CLI
+
+class TryTesting(TestCase):
+    def cli_greedy_win_test(self):
+        cli = CLI(1, kind=15)
+        cli.add_player("Andrei")
+        hacked_deck = Deck()
+        hacked_deck.cards = [("2", "C"), ("A", "C"), ("10", "C")]
+        cli.game.deck = hacked_deck
+        cli.run()
+        self.assertTrue(cli.winner == "Andrei")
+
+    def cli_greedy_lose_test(self):
+        cli = CLI(1, kind=22)
+        cli.add_player("Andrei")
+        hacked_deck = Deck()
+        hacked_deck.cards = [("2", "C"), ("A", "C"), ("10", "C"), ("9", "D")] 
+        cli.game.deck = hacked_deck 
+        cli.run() 
+        self.assertTrue(cli.winner == "Dealer")
+
+    def cli_draw_test(self):
+        cli = CLI(1, kind=21)
+        cli.add_player("Andrei")
+        hacked_deck = Deck()
+        hacked_deck.cards = [("10", "C"), ("A", "C"), ("10", "C"), ("A", "D")] 
+        cli.game.deck = hacked_deck 
+        cli.run()
+        self.assertEqual(cli.winner, "Draw") 
+
+    
+
 
 
 
