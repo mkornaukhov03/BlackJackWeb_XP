@@ -81,12 +81,3 @@ class TryTesting(TestCase):
         cli.game.deck = hacked_deck 
         cli.run()
         self.assertEqual(cli.winner, "Draw") 
-
-    
-
-
-
-
-
-        
-            

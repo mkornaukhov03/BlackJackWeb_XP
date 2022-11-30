@@ -16,7 +16,7 @@ class CLI:
         # kind is 'input' or 'random' or num for greedy
     
     def greedy_answer(self, num):
-        return self.value < num;
+        return self.value < num 
 
     def add_player(self, id : str):
         self.game.register(core.Hand(id))
@@ -53,6 +53,7 @@ class CLI:
                     self.winner = 'draw'
             else:
                 self.winner = 'draw'
+        self.game.finished = True
                 
 
     def give_initial_cards(self): 
@@ -64,17 +65,33 @@ class CLI:
                 if self.game.dealer.cards[0][0] not in ['A', 'K', 'Q', 'J']:
                     self.game.finished = True 
                     self.winner = player.id 
+
+    def give_dealer_cards(self):
+        while self.game.dealer.calc_hand() < 17:
+            self.game.dealer.add_card(self.game.deck.deal())
+
+    def finish_game(self):
+        print('Game finished!')
+        print(f'Winner is {self.winner}')
+        print('Congratulatioins!')
             
     def run(self):
         self.game.deck.shuffle() 
         
         self.give_initial_cards() 
+
+        if self.game.finished:
+            self.finish_game()
+            return
         
         for player in self.game.players: 
             value = player.calc_hand() 
             while value < 21 and self.get_answer(value): 
                 player.add_card(self.game.deck.deal())  
                 
+        self.give_dealer_cards()
+        self.check_win() 
+        self.finish_game()
     
 
 CARD_SIZE = (72, 96)
