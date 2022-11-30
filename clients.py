@@ -1,5 +1,6 @@
 from random import randint, random
 import sys
+import time
 import core
 
 import pygame
@@ -69,6 +70,9 @@ class CLI:
                 player.add_card(self.game.deck.deal()) 
     
 
+
+pygame.init()
+
 CARD_SIZE = (72, 96)
 CARD_CENTER = (36, 48)
 CARD_BACK_SIZE = (72, 96)
@@ -90,37 +94,177 @@ blackjack = pygame.font.SysFont('roboto', 70)
 
 
 
-class GuiHand(core.Hand):
-    def __init__(self, name : str):
-        self.super().__init__(name)
+class GuiHand(core.Deck):
+    def __init__(self):
+        self.cards = []
+        self.card_img = []
+        self.value = 0 
 
+    def add_card(self, card):
+        self.cards.append(card)
+        self.display_cards()
+
+    def calc_hand(self):
+        first_card_index = [a_card[0] for a_card in self.cards]
+        non_aces = [c for c in first_card_index if c != 'A']
+        aces = [c for c in first_card_index if c == 'A']
+
+        for card in non_aces:
+            if card in 'JQK':
+                self.value += 10
+            else:
+                self.value += int(card)
+
+        for card in aces:
+            if self.value <= 10:
+                self.value += 11
+            else:
+                self.value += 1
+
+
+    def display_cards(self):
+        for card in self.cards:
+            cards = "".join((card[0], card[1]))
+            if cards not in self.card_img:
+                self.card_img.append(cards)
+
+
+class GuiPlay:
+    def __init__(self, name, gui_client):
+        self.deck = core.Deck()
+        self.dealer = GuiHand()
+        self.player = GuiHand()
+        self.deck.shuffle()
+        self.client = gui_client
+        
     def blackjack(self):
-        pass
+
+        self.dealer.calc_hand()
+        self.player.calc_hand()
+
+        self.dealer.display_cards()
+        self.player.display_cards()
+
+        show_dealer_card = pygame.image.load('img/' + self.dealer.card_img[1] + '.png').convert()
+        
+        if self.player.value == 21 and self.dealer.value == 21:
+            self.client.gameDisplay.blit(show_dealer_card, (550, 200))
+            self.client.black_jack("Both with BlackJack!", 500, 250, grey)
+            time.sleep(4)
+            self.play_or_exit()
+        elif self.player.value == 21:
+            self.client.gameDisplay.blit(show_dealer_card, (550, 200))
+            self.client.black_jack("You got BlackJack!", 500, 250, green)
+            time.sleep(4)
+            self.play_or_exit()
+        elif self.dealer.value == 21:
+            self.client.gameDisplay.blit(show_dealer_card, (550, 200))
+            self.client.black_jack("Dealer has BlackJack!", 500, 250, red)
+            time.sleep(4)
+            self.play_or_exit()
+            
+        self.player.value = 0
+        self.dealer.value = 0
 
     def deal(self):
-        pass
+        for i in range(2):
+            self.dealer.add_card(self.deck.deal())
+            self.player.add_card(self.deck.deal())
+        self.dealer.display_cards()
+        self.player.display_cards()
+        self.player_card = 1
+        dealer_card = pygame.image.load('img/' + self.dealer.card_img[0] + '.png').convert()
+        dealer_card_2 = pygame.image.load('img/back.png').convert()
+            
+        player_card = pygame.image.load('img/' + self.player.card_img[0] + '.png').convert()
+        player_card_2 = pygame.image.load('img/' + self.player.card_img[1] + '.png').convert()
+
+        
+        self.client.game_texts("Dealer's hand is:", 500, 150)
+        self.client.gameDisplay.blit(dealer_card, (400, 200))
+        self.client.gameDisplay.blit(dealer_card_2, (550, 200))
+        self.client.game_texts("Your's hand is:", 500, 400)
+        self.client.gameDisplay.blit(player_card, (300, 450))
+        self.client.gameDisplay.blit(player_card_2, (410, 450))
+        self.blackjack()
+            
+            
 
     def hit(self):
-        pass
+        self.player.add_card(self.deck.deal())
+        self.blackjack()
+        self.player_card += 1
+        
+        if self.player_card == 2:
+            self.player.calc_hand()
+            self.player.display_cards()
+            player_card_3 = pygame.image.load('img/' + self.player.card_img[2] + '.png').convert()
+            self.client.gameDisplay.blit(player_card_3, (520, 450))
 
+        if self.player_card == 3:
+            self.player.calc_hand()
+            self.player.display_cards()
+            player_card_4 = pygame.image.load('img/' + self.player.card_img[3] + '.png').convert()
+            self.client.gameDisplay.blit(player_card_4, (630, 450))
+                
+        if self.player.value > 21:
+            show_dealer_card = pygame.image.load('img/' + self.dealer.card_img[1] + '.png').convert()
+            self.client.gameDisplay.blit(show_dealer_card, (550, 200))
+            self.client.game_finish("You Busted!", 500, 250, red)
+            time.sleep(4)
+            self.play_or_exit()
+            
+        self.player.value = 0
+
+        if self.player_card > 4:
+            sys.exit()
+            
+            
     def stand(self):
-        pass
-
-    def end_game(self):
+        self.dealer.display_cards();
+        show_dealer_card = pygame.image.load('img/' + self.dealer.card_img[1] + '.png').convert()
+        self.client.gameDisplay.blit(show_dealer_card, (550, 200))
+        self.blackjack()
+        self.dealer.calc_hand()
+        self.player.calc_hand()
+        if self.player.value > self.dealer.value:
+            self.client.game_finish("You Won!", 500, 250, green)
+            time.sleep(4)
+            self.play_or_exit()
+        elif self.player.value < self.dealer.value:
+            self.client.game_finish("Dealer Wins!", 500, 250, red)
+            time.sleep(4)
+            self.play_or_exit()
+        else:
+            self.client.game_finish("It's a Tie!", 500, 250, grey)
+            time.sleep(4)
+            self.play_or_exit()
+        
+    
+    def exit(self):
         sys.exit()
     
     def play_or_exit(self):
-        pass
+        self.client.game_texts("Play again press Deal!", 200, 80)
+        time.sleep(3)
+        self.player.value = 0
+        self.dealer.value = 0
+        self.deck = core.Deck()
+        self.dealer = GuiHand()
+        self.player = GuiHand()
+        self.deck.shuffle()
+        self.client.gameDisplay.fill(background_color)
+        pygame.draw.rect(self.client.gameDisplay, grey, pygame.Rect(0, 0, 250, 700))
+        pygame.display.update()
+
 
 class GUIClient: 
     def __init__(self):
         self.clock = pygame.time.Clock()
         self.gameDisplay = pygame.display.set_mode((display_width, display_height))
 
-        pygame.init()
-
         pygame.display.set_caption('BlackJack')
-        self.gameDisplay.fill(self.background_color)
+        self.gameDisplay.fill(background_color)
         pygame.draw.rect(self.gameDisplay, grey, pygame.Rect(0, 0, 250, 700))
 
     def text_objects(self, text, font):
@@ -171,15 +315,16 @@ class GUIClient:
 
     def run(self, name : str):
         running = True
-        hand = (name)
+        hand = GuiPlay(name, self)
+        pygame.display.flip()
         while running:
             for event in pygame.event.get():
-                if event.kind == pygame.QUIT:
+                if event == pygame.QUIT:
                     running = False
 
-                self.button("Deal", 30, 100, 150, 50, light_slat, dark_slat, play_blackjack.deal)
-                self.button("Hit", 30, 200, 150, 50, light_slat, dark_slat, play_blackjack.hit)
-                self.button("Stand", 30, 300, 150, 50, light_slat, dark_slat, play_blackjack.stand)
-                self.button("EXIT", 30, 500, 150, 50, light_slat, dark_red, play_blackjack.exit)
+                self.button("Deal", 30, 100, 150, 50, light_slat, dark_slat, hand.deal)
+                self.button("Hit", 30, 200, 150, 50, light_slat, dark_slat, hand.hit)
+                self.button("Stand", 30, 300, 150, 50, light_slat, dark_slat, hand.stand)
+                self.button("EXIT", 30, 500, 150, 50, light_slat, dark_red, hand.exit)
             
-        pygame.display.flip()
+            pygame.display.flip()
