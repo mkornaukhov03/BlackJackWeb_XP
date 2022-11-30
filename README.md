@@ -7,7 +7,7 @@ Design doc + progress tracker: https://docs.google.com/document/d/1E4qJgvBK0HBy-
 
 `unittest` --- for tests
 
-## Files
+## Files overview
 `img` --- directory for cards images
 
 `run_gui_dealer.py` --- run gui offline client 1 vs 1 with dealer
@@ -16,5 +16,17 @@ Design doc + progress tracker: https://docs.google.com/document/d/1E4qJgvBK0HBy-
 
 `clients.py` --- CLI and GUI client and extra supplementary classes
 
-'tests.py' --- unit tests.
+`tests.py` --- unit tests.
+
+## Details
+### `core.py`:
+
+`RANKS, SUITS` --- basic lists for deck
+
+`class Deck` --- implements logics for deck
+
+`class Hand(id : str)` --- implements logic for player (or dealer)
+
+In progress...
+
 
