@@ -31,15 +31,16 @@ class CLI:
         else: 
             return cur_value < self.kind 
 
+    # after all cards given
     def check_win(self):
         dealer_value = self.game.dealer.calc_hand()
         for player in self.game.players:
             player_value = player.calc_hand() 
             if dealer_value == 21: 
-                if player_value != 21:
+                if player_value != 21: 
                     self.winner = self.game.dealer.id 
                 else:
-                    self.winner = 'draw' 
+                    self.winner = 'draw'  
             elif player_value == 21:
                 self.winner = player.id 
             elif player_value < 21 and dealer_value < 21:
@@ -54,18 +55,25 @@ class CLI:
                 
 
     def give_initial_cards(self): 
+        self.game.dealer.add_card(self.game.deck.deal()) 
         for player in self.game.players:
             for _ in range(2):
                 player.add_card(self.game.deck.deal()) 
+            if player.calc_hand() == 21:
+                if self.game.dealer.cards[0][0] not in ['A', 'K', 'Q', 'J']:
+                    self.game.finished = True 
+                    self.winner = player.id 
             
     def run(self):
-        self.game.deck.shuffle()
-        self.game.dealer.add_card(self.game.deck.deal()) 
-        self.give_initial_cards()
-        for player in self.game.players:
-            value = player.calc_hand()
-            while value < 21 and self.get_answer(value):
-                player.add_card(self.game.deck.deal()) 
+        self.game.deck.shuffle() 
+        
+        self.give_initial_cards() 
+        
+        for player in self.game.players: 
+            value = player.calc_hand() 
+            while value < 21 and self.get_answer(value): 
+                player.add_card(self.game.deck.deal())  
+                
     
 class GUIClient: 
     def __init__(self):
