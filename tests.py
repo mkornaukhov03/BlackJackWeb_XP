@@ -19,9 +19,7 @@ class TryTesting(TestCase):
     
     def test_deck_deal(self):
         d = Deck()
-        
         d.deal()
-
         d.shuffle()
         self.assertEqual(len(d.cards) + 1, len(SUITS) * len(RANKS))
     
