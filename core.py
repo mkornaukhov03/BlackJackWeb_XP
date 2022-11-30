@@ -55,6 +55,7 @@ class Game:
         self.deck.build()
         self.dealer = Hand("dealer")
         self.players = []
+        self.finished = False
     def register(self, h : Hand):
         self.players.append(h)
 
